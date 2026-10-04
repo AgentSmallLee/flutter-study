@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/mac/Study/flutter/flutter/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/mac/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/mac/Study/flutter/Code/Flutter_Study/flutter_ecom/.android/Flutter/.cxx/debug/1h2r85s2/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/mac/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/mac/Study/flutter/Code/Flutter_Study/flutter_ecom/.android/Flutter/.cxx/debug/1h2r85s2/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

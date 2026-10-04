@@ -1,0 +1,43 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "id": 1,
+    "name": "旗舰智能手机 Pro Max 256G 深空灰",
+    "description": "全新一代旗舰处理器，超强影像系统，超长续航。采用最新工艺制程的旗舰级芯片，性能强劲，能效比优异。超视网膜XDR显示屏，显示效果细腻逼真。Pro级摄像系统，主摄、超广角、长焦三摄齐全，支持夜景模式、人像模式、电影效果模式等专业拍摄功能。内置大容量电池，支持MagSafe无线充电和快充。",
+    "price": 6999.00,
+    "originalPrice": 7999.00,
+    "imageUrl": "https://picsum.photos/seed/product1/400/400",
+    "images": [
+      "https://picsum.photos/seed/product1/800/800",
+      "https://picsum.photos/seed/product1b/800/800",
+      "https://picsum.photos/seed/product1c/800/800",
+      "https://picsum.photos/seed/product1d/800/800",
+      "https://picsum.photos/seed/product1e/800/800"
+    ],
+    "categoryId": 101,
+    "stock": 256,
+    "salesCount": 12580,
+    "rating": 4.8,
+    "reviewCount": 3256,
+    "specs": [
+      {
+        "name": "颜色",
+        "values": ["深空灰", "银色", "金色", "远峰蓝"]
+      },
+      {
+        "name": "容量",
+        "values": ["128G", "256G", "512G", "1T"]
+      }
+    ],
+    "tags": ["新品", "热卖"],
+    "detailImages": [
+      "https://picsum.photos/seed/detail1/750/600",
+      "https://picsum.photos/seed/detail2/750/600",
+      "https://picsum.photos/seed/detail3/750/600",
+      "https://picsum.photos/seed/detail4/750/600"
+    ],
+    "shipping": "顺丰包邮，48小时内发货",
+    "service": ["7天无理由退换", "正品保证", "全国联保"]
+  }
+}

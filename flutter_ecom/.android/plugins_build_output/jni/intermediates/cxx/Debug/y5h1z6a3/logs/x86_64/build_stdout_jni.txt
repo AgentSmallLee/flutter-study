@@ -1,0 +1,5 @@
+ninja: Entering directory `/Users/mac/.pub-cache/hosted/pub.dev/jni-1.1.0/android/.cxx/Debug/y5h1z6a3/x86_64'
+[1/4] Building C object CMakeFiles/jni.dir/include/dart_api_dl.c.o
+[2/4] Building C object CMakeFiles/jni.dir/dartjni.c.o
+[3/4] Building C object CMakeFiles/jni.dir/third_party/global_jni_env.c.o
+[4/4] Linking C shared library /Users/mac/Study/flutter/Code/Flutter_Study/flutter_ecom/.android/plugins_build_output/jni/intermediates/cxx/Debug/y5h1z6a3/obj/x86_64/libdartjni.so

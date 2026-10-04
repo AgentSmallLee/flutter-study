@@ -1,0 +1,178 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "name": "旗舰智能手机 Pro Max 256G 深空灰",
+      "description": "全新一代旗舰处理器，超强影像系统，超长续航",
+      "price": 6999.00,
+      "originalPrice": 7999.00,
+      "imageUrl": "https://picsum.photos/seed/product1/400/400",
+      "images": [
+        "https://picsum.photos/seed/product1/800/800",
+        "https://picsum.photos/seed/product1b/800/800",
+        "https://picsum.photos/seed/product1c/800/800"
+      ],
+      "categoryId": 101,
+      "stock": 256,
+      "salesCount": 12580,
+      "rating": 4.8,
+      "specs": ["深空灰", "银色", "金色"],
+      "tags": ["新品", "热卖"]
+    },
+    {
+      "id": 2,
+      "name": "超薄轻薄笔记本电脑 14英寸 16G+512G",
+      "description": "全金属机身，2.8K高刷屏，全天候续航",
+      "price": 5299.00,
+      "originalPrice": 5999.00,
+      "imageUrl": "https://picsum.photos/seed/product2/400/400",
+      "images": [
+        "https://picsum.photos/seed/product2/800/800"
+      ],
+      "categoryId": 201,
+      "stock": 128,
+      "salesCount": 8900,
+      "rating": 4.7,
+      "specs": ["星空灰", "月光银"],
+      "tags": ["限时特惠"]
+    },
+    {
+      "id": 3,
+      "name": "真无线蓝牙耳机 主动降噪 超长续航",
+      "description": "深度主动降噪，Hi-Fi音质，40小时续航",
+      "price": 399.00,
+      "originalPrice": 599.00,
+      "imageUrl": "https://picsum.photos/seed/product3/400/400",
+      "images": [
+        "https://picsum.photos/seed/product3/800/800"
+      ],
+      "categoryId": 104,
+      "stock": 512,
+      "salesCount": 35600,
+      "rating": 4.6,
+      "specs": ["黑色", "白色"],
+      "tags": ["爆款"]
+    },
+    {
+      "id": 4,
+      "name": "智能手表运动版 GPS 心率血氧监测",
+      "description": "14天超长续航，100+运动模式，50米防水",
+      "price": 899.00,
+      "originalPrice": 1299.00,
+      "imageUrl": "https://picsum.photos/seed/product4/400/400",
+      "images": [
+        "https://picsum.photos/seed/product4/800/800"
+      ],
+      "categoryId": 103,
+      "stock": 300,
+      "salesCount": 15200,
+      "rating": 4.5,
+      "specs": ["黑色", "银色", "金色"],
+      "tags": ["新品"]
+    },
+    {
+      "id": 5,
+      "name": "4K超高清智能电视 65英寸 HDR MEMC",
+      "description": "4K超清全面屏，AI画质引擎，远场语音",
+      "price": 2999.00,
+      "originalPrice": 3999.00,
+      "imageUrl": "https://picsum.photos/seed/product5/400/400",
+      "images": [
+        "https://picsum.photos/seed/product5/800/800"
+      ],
+      "categoryId": 3,
+      "stock": 64,
+      "salesCount": 6700,
+      "rating": 4.8,
+      "specs": ["55英寸", "65英寸", "75英寸"],
+      "tags": ["热卖"]
+    },
+    {
+      "id": 6,
+      "name": "变频节能空调 1.5匹 一级能效 自清洁",
+      "description": "一级能效变频，急速制冷热，56℃自清洁",
+      "price": 2699.00,
+      "originalPrice": 3299.00,
+      "imageUrl": "https://picsum.photos/seed/product6/400/400",
+      "images": [
+        "https://picsum.photos/seed/product6/800/800"
+      ],
+      "categoryId": 3,
+      "stock": 200,
+      "salesCount": 4300,
+      "rating": 4.7,
+      "specs": ["1匹", "1.5匹", "2匹"],
+      "tags": []
+    },
+    {
+      "id": 7,
+      "name": "男士休闲运动鞋 透气网面 轻便缓震",
+      "description": "飞织网面透气，气垫缓震，多色可选",
+      "price": 299.00,
+      "originalPrice": 599.00,
+      "imageUrl": "https://picsum.photos/seed/product7/400/400",
+      "images": [
+        "https://picsum.photos/seed/product7/800/800"
+      ],
+      "categoryId": 4,
+      "stock": 999,
+      "salesCount": 28900,
+      "rating": 4.4,
+      "specs": ["黑色", "白色", "灰色", "蓝色"],
+      "tags": ["爆款", "限时特惠"]
+    },
+    {
+      "id": 8,
+      "name": "补水保湿精华液 30ml 玻尿酸 烟酰胺",
+      "description": "三重玻尿酸，5%烟酰胺，深层补水提亮",
+      "price": 168.00,
+      "originalPrice": 298.00,
+      "imageUrl": "https://picsum.photos/seed/product8/400/400",
+      "images": [
+        "https://picsum.photos/seed/product8/800/800"
+      ],
+      "categoryId": 5,
+      "stock": 500,
+      "salesCount": 18600,
+      "rating": 4.9,
+      "specs": ["30ml", "50ml"],
+      "tags": ["热卖"]
+    },
+    {
+      "id": 9,
+      "name": "有机特级初榨橄榄油 500ml 西班牙进口",
+      "description": "西班牙原瓶进口，冷榨工艺，酸度≤0.5%",
+      "price": 128.00,
+      "originalPrice": 168.00,
+      "imageUrl": "https://picsum.photos/seed/product9/400/400",
+      "images": [
+        "https://picsum.photos/seed/product9/800/800"
+      ],
+      "categoryId": 6,
+      "stock": 300,
+      "salesCount": 9800,
+      "rating": 4.6,
+      "specs": ["250ml", "500ml", "750ml"],
+      "tags": []
+    },
+    {
+      "id": 10,
+      "name": "儿童益智积木玩具 1000粒 大颗粒 3-6岁",
+      "description": "ABS环保材质，大颗粒防吞咽，多种拼搭造型",
+      "price": 199.00,
+      "originalPrice": 399.00,
+      "imageUrl": "https://picsum.photos/seed/product10/400/400",
+      "images": [
+        "https://picsum.photos/seed/product10/800/800"
+      ],
+      "categoryId": 7,
+      "stock": 200,
+      "salesCount": 12400,
+      "rating": 4.8,
+      "specs": ["500粒", "1000粒", "1500粒"],
+      "tags": ["热卖"]
+    }
+  ]
+}
