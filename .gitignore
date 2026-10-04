@@ -1,0 +1,90 @@
+# ========== OS ==========
+.DS_Store
+Thumbs.db
+
+# ========== Editor / IDE ==========
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code (uncomment to exclude entirely)
+#.vscode/
+
+# ========== Flutter / Dart (applies to flutter_ecom/) ==========
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+coverage/
+.widget_preview/
+
+# Symbolication / Obfuscation
+app.*.symbols
+app.*.map.json
+
+# ========== Android (applies to android_ecom/ & flutter_ecom/.android/) ==========
+*.apk
+*.aar
+*.ap_
+*.aab
+*.dex
+*.class
+
+bin/
+gen/
+out/
+build/
+.gradle/
+.gradle-cache/
+local.properties
+captures/
+.externalNativeBuild
+.cxx/
+.navigation/
+.kotlin/
+
+# Android Studio specific .idea files (if .idea/ is partially tracked)
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries
+.idea/jarRepositories.xml
+.idea/caches
+.idea/modules.xml
+.idea/navEditor.xml
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# Profiling
+*.hprof
+
+# Logs
+*.log
+
+# ========== Misc ==========
+*.pyc
+*.swp
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# ========== Project-specific ==========
+# Claude Code
+.claude/
