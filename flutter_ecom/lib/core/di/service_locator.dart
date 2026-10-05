@@ -23,6 +23,7 @@ import '../../features/cart/data/models/cart_item_hive_model.dart';
 import '../../features/cart/data/repositories/cart_repository_impl.dart';
 import '../../features/cart/domain/repositories/cart_repository.dart';
 import '../../features/cart/domain/usecases/add_to_cart_usecase.dart';
+import '../../features/cart/domain/usecases/clear_cart_usecase.dart';
 import '../../features/cart/domain/usecases/get_cart_count_usecase.dart';
 import '../../features/cart/domain/usecases/get_cart_usecase.dart';
 import '../../features/cart/domain/usecases/remove_cart_item_usecase.dart';
@@ -240,6 +241,9 @@ void _registerUseCases() {
   getIt.registerFactory<GetCartCountUseCase>(
     () => GetCartCountUseCase(getIt<CartRepository>()),
   );
+  getIt.registerFactory<ClearCartUseCase>(
+    () => ClearCartUseCase(getIt<CartRepository>()),
+  );
 
   // ---------- Auth ----------
   getIt.registerFactory<LoginUseCase>(
@@ -320,6 +324,7 @@ void _registerBlocs() {
       toggleSelectAllUseCase: getIt<ToggleSelectAllUseCase>(),
       removeCartItemUseCase: getIt<RemoveCartItemUseCase>(),
       getCartCountUseCase: getIt<GetCartCountUseCase>(),
+      clearCartUseCase: getIt<ClearCartUseCase>(),
     )..add(const CartLoaded()),
   );
 

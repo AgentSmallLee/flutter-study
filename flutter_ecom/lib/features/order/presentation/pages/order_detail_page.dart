@@ -105,13 +105,20 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
         bottomNavigationBar:
             BlocBuilder<OrderDetailBloc, OrderDetailState>(
           builder: (context, state) {
+            Widget content;
             if (state is OrderDetailSuccess) {
-              return _buildBottomBar(context, state.order, false);
+              content = _buildBottomBar(context, state.order, false);
+            } else if (state is OrderDetailActionLoading) {
+              content = _buildBottomBar(context, state.order, true);
+            } else {
+              content = const SizedBox.shrink();
             }
-            if (state is OrderDetailActionLoading) {
-              return _buildBottomBar(context, state.order, true);
-            }
-            return const SizedBox.shrink();
+            // 面试讲解点：
+            // Scaffold 的 bottomNavigationBar 如果返回的是无约束组件（如 BlocBuilder），
+            // 内部的 Row/按钮可能会收到无限宽度约束，导致布局崩溃。
+            // 用 SizedBox(width: double.infinity) 包一层，
+            // 明确告诉框架底部栏的宽度等于屏幕宽度。
+            return SizedBox(width: double.infinity, child: content);
           },
         ),
       ),
@@ -527,12 +534,19 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   }
 
   // 底部操作栏
+  //
+  // 面试讲解点：
+  // Scaffold 的 bottomNavigationBar 需要明确的宽度约束，
+  // 否则内部的 Row 和按钮可能会拿到无限宽度的约束导致布局报错。
+  // 这里外层用 SizedBox.expand 或者 Container(width: double.infinity)
+  // 保证底部栏撑满屏幕宽度，内部按钮才能正确布局。
   Widget _buildBottomBar(
     BuildContext context,
     OrderEntity order,
     bool isActionLoading,
   ) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimens.spacingM,
         vertical: AppDimens.spacingS,

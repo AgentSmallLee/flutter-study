@@ -1,2 +1,0 @@
-/Users/mac/Study/flutter/Code/Flutter_Study/flutter_ecom/.android/Flutter/.cxx/debug/1h2r85s2/arm64-v8a/CMakeFiles/edit_cache.dir
-/Users/mac/Study/flutter/Code/Flutter_Study/flutter_ecom/.android/Flutter/.cxx/debug/1h2r85s2/arm64-v8a/CMakeFiles/rebuild_cache.dir

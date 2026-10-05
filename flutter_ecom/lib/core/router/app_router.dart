@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/cart/presentation/bloc/cart_bloc.dart';
 import '../../features/cart/presentation/bloc/cart_state.dart';
 import '../../features/cart/presentation/pages/cart_page.dart';
 import '../../features/category/presentation/pages/category_page.dart';
@@ -218,12 +219,29 @@ class _MainShellState extends State<MainShell> {
         onTap: _onItemTapped,
         items: _navItems.map((e) {
           if (e.label == '购物车') {
+            // 面试讲解点：
+            // 底部导航购物车角标使用 BlocSelector 细粒度刷新，
+            // 只监听 totalCount 字段。购物车其他状态变化（如选中状态、总价）
+            // 不会触发底部导航的重建，避免不必要的性能开销。
+            // 底部导航是全局组件，减少它的重建次数对整体性能有帮助。
             return BottomNavigationBarItem(
-              icon: _CartBadgeIcon(icon: e.icon, count: 0),
-              activeIcon: _CartBadgeIcon(
-                icon: e.activeIcon,
-                count: 0,
-                isActive: true,
+              icon: BlocSelector<CartBloc, CartState, int>(
+                bloc: getIt<CartBloc>(),
+                selector: (state) => state.totalCount,
+                builder: (context, count) {
+                  return _CartBadgeIcon(icon: e.icon, count: count);
+                },
+              ),
+              activeIcon: BlocSelector<CartBloc, CartState, int>(
+                bloc: getIt<CartBloc>(),
+                selector: (state) => state.totalCount,
+                builder: (context, count) {
+                  return _CartBadgeIcon(
+                    icon: e.activeIcon,
+                    count: count,
+                    isActive: true,
+                  );
+                },
               ),
               label: e.label,
             );

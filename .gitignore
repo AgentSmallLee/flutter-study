@@ -24,6 +24,11 @@ build/
 coverage/
 .widget_preview/
 
+# Flutter Module 自动生成的宿主工程（flutter create . 生成，无需提交）
+flutter_ecom/.android/
+flutter_ecom/.ios/
+flutter_ecom/.dart_tool/
+
 # Symbolication / Obfuscation
 app.*.symbols
 app.*.map.json

@@ -124,10 +124,20 @@ class ProductBottomBar extends StatelessWidget {
     );
   }
 
+  /// 购物车徽标
+  ///
+  /// 面试讲解点：
+  /// 使用 BlocSelector 做细粒度刷新，只监听 totalCount 字段。
+  /// 购物车 state 里还有 items、selectedTotalPrice 等字段，
+  /// 如果用 BlocBuilder，用户切换选中状态、改总价时徽标也会重建，
+  /// 但它显示的内容没变——属于不必要的重建。
+  /// BlocSelector 通过 selector 只取出关心的字段，
+  /// 值没变就跳过 rebuild，优化性能。
   Widget _buildCartIcon() {
-    return BlocBuilder<CartBloc, CartState>(
+    return BlocSelector<CartBloc, CartState, int>(
       bloc: getIt<CartBloc>(),
-      builder: (context, state) {
+      selector: (state) => state.totalCount,
+      builder: (context, totalCount) {
         return InkWell(
           onTap: () {
             // TODO: 跳转到购物车 Tab
@@ -151,7 +161,7 @@ class ProductBottomBar extends StatelessWidget {
                   ),
                 ],
               ),
-              if (state.totalCount > 0)
+              if (totalCount > 0)
                 Positioned(
                   right: -6,
                   top: -4,
@@ -164,9 +174,7 @@ class ProductBottomBar extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      state.totalCount > 99
-                          ? '99+'
-                          : '${state.totalCount}',
+                      totalCount > 99 ? '99+' : '$totalCount',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,

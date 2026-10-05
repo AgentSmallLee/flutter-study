@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import '../../domain/usecases/add_to_cart_usecase.dart';
+import '../../domain/usecases/clear_cart_usecase.dart';
 import '../../domain/usecases/get_cart_count_usecase.dart';
 import '../../domain/usecases/get_cart_usecase.dart';
 import '../../domain/usecases/remove_cart_item_usecase.dart';
@@ -25,6 +26,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     required ToggleSelectAllUseCase toggleSelectAllUseCase,
     required RemoveCartItemUseCase removeCartItemUseCase,
     required GetCartCountUseCase getCartCountUseCase,
+    required ClearCartUseCase clearCartUseCase,
   })  : _getCartUseCase = getCartUseCase,
         _addToCartUseCase = addToCartUseCase,
         _updateQuantityUseCase = updateQuantityUseCase,
@@ -32,6 +34,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         _toggleSelectAllUseCase = toggleSelectAllUseCase,
         _removeCartItemUseCase = removeCartItemUseCase,
         _getCartCountUseCase = getCartCountUseCase,
+        _clearCartUseCase = clearCartUseCase,
         super(const CartState()) {
     on<CartLoaded>(_onLoaded);
     on<CartItemAdded>(_onItemAdded);
@@ -49,6 +52,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   final ToggleSelectAllUseCase _toggleSelectAllUseCase;
   final RemoveCartItemUseCase _removeCartItemUseCase;
   final GetCartCountUseCase _getCartCountUseCase;
+  final ClearCartUseCase _clearCartUseCase;
 
   /// 加载购物车
   Future<void> _onLoaded(CartLoaded event, Emitter<CartState> emit) async {
@@ -100,9 +104,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     await _refresh(emit);
   }
 
-  /// 清空
+  /// 清空购物车
   Future<void> _onCleared(CartCleared event, Emitter<CartState> emit) async {
-    // TODO: 调用 repository.clearCart()
+    await _clearCartUseCase();
     await _refresh(emit);
   }
 

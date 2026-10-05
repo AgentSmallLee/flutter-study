@@ -15,8 +15,19 @@ import '../bloc/cart_state.dart';
 /// 面试讲解点：
 /// 购物车使用全局 CartBloc，任何页面修改购物车后这里都会同步更新。
 /// 左滑删除、数量加减、全选等都是通过 Event 驱动状态变化。
-class CartPage extends StatelessWidget {
+///
+/// 删除功能有两种交互方式：
+/// 1. 左滑删除：快速删除单个商品，常见于非编辑模式下的快捷操作
+/// 2. 管理模式批量删除：进入编辑模式后选中多个商品，底部批量删除
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  bool _isEditMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +46,13 @@ class CartPage extends StatelessWidget {
                 if (state.items.isEmpty) return const SizedBox.shrink();
                 return TextButton(
                   onPressed: () {
-                    // TODO: 编辑模式切换
+                    setState(() {
+                      _isEditMode = !_isEditMode;
+                    });
                   },
-                  child: const Text(
-                    '管理',
-                    style: TextStyle(
+                  child: Text(
+                    _isEditMode ? '完成' : '管理',
+                    style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: AppDimens.fontM,
                     ),
@@ -58,12 +71,15 @@ class CartPage extends StatelessWidget {
           },
         ),
         bottomNavigationBar:
-            BlocBuilder<CartBloc, CartState>(
-          builder: (context, state) {
-            if (state.items.isEmpty) {
+            BlocSelector<CartBloc, CartState, CartBottomBarState>(
+          selector: (state) => CartBottomBarState.fromCartState(state),
+          builder: (context, bottomState) {
+            if (bottomState.isEmpty) {
               return const SizedBox.shrink();
             }
-            return _buildBottomBar(context, state);
+            return _isEditMode
+                ? _buildEditBottomBar(context, bottomState)
+                : _buildBottomBar(context, bottomState);
           },
         ),
       ),
@@ -127,12 +143,63 @@ class CartPage extends StatelessWidget {
           const SizedBox(height: AppDimens.spacingM),
       itemBuilder: (context, index) {
         final item = state.items[index];
-        return _CartItemCard(item: item);
+        // 面试讲解点：
+        // 使用 Dismissible 实现左滑删除，key 使用 productId 保证唯一性。
+        // confirmDismiss 弹确认框，避免用户误删。
+        return Dismissible(
+          key: Key('cart_item_${item.productId}'),
+          direction: DismissDirection.endToStart,
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: AppDimens.spacingL),
+            decoration: BoxDecoration(
+              color: AppColors.price,
+              borderRadius: BorderRadius.circular(AppDimens.radiusM),
+            ),
+            child: const Icon(
+              Icons.delete_outline,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
+          confirmDismiss: (direction) async {
+            // 弹确认对话框
+            return await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('删除商品'),
+                    content: Text('确定要把「${item.productName}」从购物车移除吗？'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        child: const Text(
+                          '删除',
+                          style: TextStyle(color: AppColors.price),
+                        ),
+                      ),
+                    ],
+                  ),
+                ) ??
+                false;
+          },
+          onDismissed: (direction) {
+            context.read<CartBloc>().add(CartItemRemoved(item.productId));
+          },
+          child: _CartItemCard(item: item),
+        );
       },
     );
   }
 
-  Widget _buildBottomBar(BuildContext context, CartState state) {
+  /// 编辑模式底部栏：全选 + 删除选中
+  Widget _buildEditBottomBar(
+    BuildContext context,
+    CartBottomBarState bottomState,
+  ) {
     return Container(
       padding: EdgeInsets.only(
         left: AppDimens.spacingL,
@@ -154,17 +221,142 @@ class CartPage extends StatelessWidget {
             InkWell(
               onTap: () {
                 context.read<CartBloc>().add(
-                      CartSelectAllToggled(!state.isAllSelected),
+                      CartSelectAllToggled(!bottomState.isAllSelected),
                     );
               },
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    state.isAllSelected
+                    bottomState.isAllSelected
                         ? Icons.check_circle
                         : Icons.radio_button_unchecked,
-                    color: state.isAllSelected
+                    color: bottomState.isAllSelected
+                        ? AppColors.primary
+                        : AppColors.textHint,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 4),
+                  const Text(
+                    '全选',
+                    style: TextStyle(
+                      fontSize: AppDimens.fontS,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Spacer(),
+            // 删除选中按钮
+            SizedBox(
+              width: 120,
+              height: AppDimens.buttonHeight,
+              child: ElevatedButton(
+                onPressed: bottomState.selectedCount > 0
+                    ? () async {
+                        final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('删除商品'),
+                                content: Text(
+                                    '确定要删除选中的 ${bottomState.selectedCount} 件商品吗？'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(ctx).pop(false),
+                                    child: const Text('取消'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(ctx).pop(true),
+                                    child: const Text(
+                                      '删除',
+                                      style: TextStyle(color: AppColors.price),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ) ??
+                            false;
+                        if (confirm) {
+                          // 面试讲解点：
+                          // 批量删除的实现思路：遍历选中的商品，逐个发送 CartItemRemoved 事件。
+                          // 也可以在 Bloc 里新增一个批量删除的事件（CartItemsRemoved），
+                          // 一次性删除多条，性能更好。这里为了简化演示，用逐个删除的方式。
+                          final bloc = context.read<CartBloc>();
+                          final selectedIds = bloc.state.items
+                              .where((item) => item.selected)
+                              .map((item) => item.productId)
+                              .toList();
+                          for (final id in selectedIds) {
+                            bloc.add(CartItemRemoved(id));
+                          }
+                          // 删除完退出编辑模式
+                          setState(() {
+                            _isEditMode = false;
+                          });
+                        }
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.price,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: AppColors.textHint,
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppDimens.radiusFull),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  '删除(${bottomState.selectedCount})',
+                  style: const TextStyle(
+                    fontSize: AppDimens.fontM,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(BuildContext context, CartBottomBarState bottomState) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: AppDimens.spacingL,
+        right: AppDimens.spacingL,
+        top: AppDimens.spacingS,
+        bottom: AppDimens.spacingS + MediaQuery.of(context).padding.bottom,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          top: BorderSide(color: AppColors.divider, width: 0.5),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            // 全选
+            InkWell(
+              onTap: () {
+                context.read<CartBloc>().add(
+                      CartSelectAllToggled(!bottomState.isAllSelected),
+                    );
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    bottomState.isAllSelected
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: bottomState.isAllSelected
                         ? AppColors.primary
                         : AppColors.textHint,
                     size: 22,
@@ -197,7 +389,7 @@ class CartPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      state.selectedTotalPrice.toPriceString(),
+                      bottomState.selectedTotalPrice.toPriceString(),
                       style: const TextStyle(
                         fontSize: AppDimens.fontL,
                         fontWeight: FontWeight.bold,
@@ -207,7 +399,7 @@ class CartPage extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  '已选 ${state.selectedCount} 件',
+                  '已选 ${bottomState.selectedCount} 件',
                   style: const TextStyle(
                     fontSize: AppDimens.fontXS,
                     color: AppColors.textHint,
@@ -221,7 +413,7 @@ class CartPage extends StatelessWidget {
               width: 110,
               height: AppDimens.buttonHeight,
               child: ElevatedButton(
-                onPressed: state.selectedCount > 0
+                onPressed: bottomState.selectedCount > 0
                     ? () {
                         // TODO: 去结算
                       }

@@ -39,10 +39,20 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   final ScrollController _scrollController = ScrollController();
   double _titleOpacity = 0.0;
+  late final ProductDetailBloc _productBloc;
 
   @override
   void initState() {
     super.initState();
+    // 面试讲解点：
+    // Bloc 在 initState 中创建并发起加载请求，
+    // 而不是在 build 方法里创建。因为 build 会被多次调用（比如 setState 滚动时），
+    // 如果在 build 里调用 getIt（工厂模式），每次都会创建新的 Bloc 实例，
+    // 导致重复请求和页面闪烁。
+    // 在 initState 里创建一次，通过 BlocProvider.value 提供给子树，
+    // 保证整个页面生命周期内只有一个 Bloc 实例。
+    _productBloc = getIt<ProductDetailBloc>()
+      ..add(ProductDetailLoadEvent(widget.productId));
     _scrollController.addListener(_onScroll);
   }
 
@@ -50,6 +60,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _productBloc.close();
     super.dispose();
   }
 
@@ -127,8 +138,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: getIt<ProductDetailBloc>()
-        ..add(ProductDetailLoadEvent(widget.productId)),
+      value: _productBloc,
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: BlocBuilder<ProductDetailBloc, ProductDetailState>(

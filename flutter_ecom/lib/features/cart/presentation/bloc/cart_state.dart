@@ -43,3 +43,37 @@ class CartState extends Equatable {
   @override
   List<Object> get props => [items, totalCount, selectedTotalPrice];
 }
+
+/// 购物车底部栏需要的状态（用于 BlocSelector 细粒度刷新）
+///
+/// 面试讲解点：
+/// 底部栏只关心合计价格、是否全选、选中数量，
+/// 不关心商品列表的具体内容（比如商品名称、图片等）。
+/// 把底部栏需要的字段抽成一个独立的类，
+/// 配合 BlocSelector 使用，只有这些字段变化时底部栏才重建，
+/// 避免商品列表内容变化（如修改某个商品的规格）导致底部栏不必要的重建。
+class CartBottomBarState extends Equatable {
+  final bool isEmpty;
+  final bool isAllSelected;
+  final int selectedCount;
+  final double selectedTotalPrice;
+
+  const CartBottomBarState({
+    required this.isEmpty,
+    required this.isAllSelected,
+    required this.selectedCount,
+    required this.selectedTotalPrice,
+  });
+
+  factory CartBottomBarState.fromCartState(CartState state) {
+    return CartBottomBarState(
+      isEmpty: state.items.isEmpty,
+      isAllSelected: state.isAllSelected,
+      selectedCount: state.selectedCount,
+      selectedTotalPrice: state.selectedTotalPrice,
+    );
+  }
+
+  @override
+  List<Object> get props => [isEmpty, isAllSelected, selectedCount, selectedTotalPrice];
+}

@@ -54,17 +54,31 @@ class MockApiAdapter implements HttpClientAdapter {
     );
 
     // 查找对应的 mock 文件
+    //
+    // 面试讲解点：
+    // 路径匹配的优先级问题——
+    // 必须先判断精确匹配，再判断前缀匹配，否则像 /api/products/1 这样的详情路径
+    // 会被 /api/products 这个前缀提前拦截，导致返回列表数据而不是详情数据。
     String? mockFile;
-    for (final entry in _pathMap.entries) {
-      if (path.startsWith(entry.key) || path == entry.key) {
-        mockFile = entry.value;
-        break;
+
+    // 1. 先判断商品详情：/api/products/:id（路径里包含数字 id）
+    // 注意：必须放在 /api/products 前缀匹配之前，否则会被列表接口拦截
+    if (path.startsWith('/api/products/') && path != '/api/products/search') {
+      final idPart = path.replaceFirst('/api/products/', '');
+      // 检查 idPart 是不是数字（商品详情路径）
+      if (int.tryParse(idPart) != null) {
+        mockFile = 'mock/assets/product_detail.json';
       }
     }
 
-    // 商品详情特殊处理：/api/products/:id
-    if (mockFile == null && path.startsWith('/api/products/')) {
-      mockFile = 'mock/assets/product_detail.json';
+    // 2. 再遍历通用路径映射
+    if (mockFile == null) {
+      for (final entry in _pathMap.entries) {
+        if (path.startsWith(entry.key) || path == entry.key) {
+          mockFile = entry.value;
+          break;
+        }
+      }
     }
 
     // 订单详情特殊处理：/api/orders/:id
@@ -88,15 +102,97 @@ class MockApiAdapter implements HttpClientAdapter {
 
       dynamic responseData = data;
 
+      // 商品详情：从商品列表中找对应 id 的商品，合并详情模板数据
+      // 面试讲解点：
+      // Mock 数据中商品列表和商品详情是分开的两份文件。
+      // 商品详情接口需要返回"列表基础信息 + 详情扩展信息"的完整数据。
+      // 实现思路：从 products.json 找到对应 id 的商品（名称、价格、主图等基础字段），
+      // 再用 product_detail.json 里的详情字段（specs、detailImages、service 等）补全，
+      // 这样不同 id 的商品信息都不一样，和列表页显示一致，更接近真实后端。
+      if (mockFile == 'mock/assets/product_detail.json' &&
+          data is Map &&
+          data['data'] is Map) {
+        final productId = int.tryParse(path.replaceFirst('/api/products/', '')) ?? 1;
+
+        // 1. 从商品列表文件中读取对应 id 的商品基础信息
+        final listJsonString =
+            await rootBundle.loadString('mock/assets/products.json');
+        final listData = json.decode(listJsonString);
+        Map<String, dynamic>? baseProduct;
+        if (listData is Map && listData['data'] is List) {
+          final list = listData['data'] as List;
+          try {
+            baseProduct = list.firstWhere(
+              (e) => e['id'] == productId,
+              orElse: () => null,
+            ) as Map<String, dynamic>?;
+          } catch (_) {
+            baseProduct = null;
+          }
+        }
+
+        // 2. 详情模板数据（specs、detailImages、service 等扩展字段）
+        final detailTemplate = data['data'] as Map<String, dynamic>;
+
+        // 3. 合并：基础信息用列表中的，详情字段用模板的
+        // 注意：列表里的 specs 是字符串数组，详情里是对象数组（带分组），格式不兼容
+        // 所以 specs 强制用详情模板里的
+        final skipKeys = {'specs'};
+        final productData = <String, dynamic>{};
+        if (baseProduct != null) {
+          baseProduct.forEach((key, value) {
+            if (!skipKeys.contains(key)) {
+              productData[key] = value;
+            }
+          });
+        } else {
+          // 列表里找不到就用模板里的基础信息，id 替换掉
+          productData.addAll(detailTemplate);
+          productData['id'] = productId;
+        }
+        // 详情独有字段（列表里没有的，用模板补全）
+        detailTemplate.forEach((key, value) {
+          if (!productData.containsKey(key)) {
+            productData[key] = value;
+          }
+        });
+
+        // 4. 补全图片画廊（列表里 images 可能只有 3 张，详情页用 5 张）
+        final seed = 'product$productId';
+        if (productData['images'] == null ||
+            (productData['images'] as List).length < 5) {
+          productData['images'] = [
+            'https://picsum.photos/seed/${seed}a/800/800',
+            'https://picsum.photos/seed/${seed}b/800/800',
+            'https://picsum.photos/seed/${seed}c/800/800',
+            'https://picsum.photos/seed/${seed}d/800/800',
+            'https://picsum.photos/seed/${seed}e/800/800',
+          ];
+        }
+        // 详情图文
+        productData['detailImages'] = [
+          'https://picsum.photos/seed/detail${seed}1/750/600',
+          'https://picsum.photos/seed/detail${seed}2/750/600',
+          'https://picsum.photos/seed/detail${seed}3/750/600',
+        ];
+
+        responseData = {
+          'code': 200,
+          'message': 'success',
+          'data': productData,
+        };
+      }
       // 订单详情：从列表中筛选单条
       if (path.startsWith('/api/orders/') && path != '/api/orders') {
         final orderId = path.replaceFirst('/api/orders/', '');
+        AppLogger.d('Order detail request: orderId=$orderId, listLength=${(data['data'] as List?)?.length}');
         if (data is Map && data['data'] is List) {
           final list = data['data'] as List;
           final order = list.firstWhere(
             (e) => e['id'] == orderId || e['orderNo'] == orderId,
             orElse: () => null,
           );
+          AppLogger.d('Order detail found: ${order != null ? order['orderNo'] : "NULL"}');
           responseData = {
             'code': 200,
             'message': 'success',

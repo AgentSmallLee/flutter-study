@@ -28,7 +28,6 @@ class BridgeMethods {
   static const String logout = 'logout';
 
   // 支付
-  static const String aliPay = 'aliPay';
   static const String weChatPay = 'weChatPay';
 
   // 相机 / 相册
@@ -118,20 +117,35 @@ class NativeBridge {
     }
   }
 
+  /// 通知原生登出（清除原生登录态、跳登录页等）
+  ///
+  /// 面试讲解点：
+  /// Token 失效（401）或用户主动登出时，Flutter 调用此方法通知原生，
+  /// 原生负责清除自己的登录态、跳转到登录页等操作，
+  /// 保证两端登录态一致。
+  Future<void> logout() async {
+    try {
+      await _channel.invokeMethod<void>(BridgeMethods.logout);
+      AppLogger.d('NativeBridge.logout success');
+    } on PlatformException catch (e, stackTrace) {
+      AppLogger.e('NativeBridge.logout failed: ${e.message}', e, stackTrace);
+    }
+  }
+
   // ========== 支付相关 ==========
 
-  /// 支付宝支付
+  /// 微信支付
   /// 返回支付结果状态：success / failure / cancel
-  Future<String> aliPay(String orderId, String payInfo) async {
+  Future<String> weChatPay(String orderId, String payInfo) async {
     try {
       final result = await _channel.invokeMethod<String>(
-        BridgeMethods.aliPay,
+        BridgeMethods.weChatPay,
         {'orderId': orderId, 'payInfo': payInfo},
       );
-      AppLogger.d('NativeBridge.aliPay result: $result');
+      AppLogger.d('NativeBridge.weChatPay result: $result');
       return result ?? 'failure';
     } on PlatformException catch (e, stackTrace) {
-      AppLogger.e('NativeBridge.aliPay failed: ${e.message}', e, stackTrace);
+      AppLogger.e('NativeBridge.weChatPay failed: ${e.message}', e, stackTrace);
       return 'failure';
     }
   }
