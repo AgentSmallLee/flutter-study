@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp.router(
         title: 'FlutterEcom',
         debugShowCheckedModeBanner: false,
+        showPerformanceOverlay: true,
         // 主题
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,

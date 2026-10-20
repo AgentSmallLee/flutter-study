@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
 import 'app.dart';
 import 'core/app/app_bloc_observer.dart';
 import 'core/di/service_locator.dart';
@@ -16,6 +17,7 @@ import 'core/utils/logger.dart';
 /// 4. configureDependencies - 依赖注入初始化
 /// 5. runApp - 启动 App
 Future<void> main() async {
+  debugProfileBuildsEnabled = true;
   // 确保 Flutter 引擎绑定完成
   WidgetsFlutterBinding.ensureInitialized();
 
