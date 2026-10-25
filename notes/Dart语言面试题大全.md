@@ -659,6 +659,23 @@ void main() {
 - `Future(() {...})` 构造的函数体进**事件队列**;`Future.delayed(zero, ...)` 同样进事件队列但优先级更靠后(先注册的 `Future()` 先执行)。
 - 判断口诀:同步代码 → 微任务(全部) → 事件队列(先来先执行)。
 
+**追问:为什么 E 输出在 B 前面?(都是微任务,谁先谁后?)**
+
+`scheduleMicrotask` 和 `Future.value().then` 的回调虽然都属于微任务,但调度机制有区别:
+
+1. **`scheduleMicrotask(() => print('B'))`**
+   直接把回调放入**微任务队列末尾**,等待事件循环统一调度执行。
+
+2. **`Future.value().then((_) => print('E'))`**
+   `Future.value()` 创建的是一个**已同步完成**的 `_Future.immediate`。调用 `.then()` 注册回调时,因为 Future 已经是完成状态,Dart 内部会通过 `_propagateToListeners` 机制把 then 回调**立即调度为微任务**。
+
+**E 比 B 先执行的原因:**
+`Future.value()` 是同步完成的 Future,它的 then 回调走的是 Future 内部的"完成传播"链路(`_completeWithValue` → `_propagateToListeners`),回调在注册时就被标记为"待执行的微任务",插入到微任务调度的最前端。而 `scheduleMicrotask` 是用户手动追加到队列末尾的。
+
+简单记:**已完成 Future 的 then 回调优先级 > 普通 scheduleMicrotask**。
+
+> 💡 注意:核心考点是三层调度模型(同步 → 微任务 → 事件),E 和 B 都在微任务层、都在 C/D 之前,这是最重要的。两者的细微顺序属于进阶考点,不同 Dart 版本的实现可能略有差异。
+
 ### 3. `Future` 和 `async/await` 的关系?
 
 `async` 标记函数为异步函数,返回值自动包装为 Future;`await` 挂起当前函数、注册后续代码为恢复回调,但不阻塞 isolate,事件循环继续处理其他任务:

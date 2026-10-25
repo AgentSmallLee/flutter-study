@@ -755,27 +755,98 @@ class FlutterBridgeManager : MethodChannel.MethodCallHandler {
 
 ### 3. Add-to-App 混合开发怎么集成?(你项目的核心)
 
-```kotlin
-// 1. Gradle 集成 flutter module
-// settings.gradle: setBindings(...), include ':app', includeBuild('../flutter_ecom')
+我们项目是 **原生壳 + Flutter 电商业务** 的混合开发模式,采用 Flutter 官方的 Add-to-App 方案。
 
-// 2. Manifest + Activity
-class SplashActivity : FlutterActivity() // 或普通 Activity 里自渲染
-// 3. 启动引擎
-val engine = FlutterEngine(context)
-engine.dartExecutor.executeEntrypoint(
-    DartExecutor.DartEntrypoint(FlutterInitializer.findAppBundlePath(), "main")
-)
-FlutterEngineCache.getInstance(context).put("ecom_engine", engine) // 预热
-// 4. 展示
-startActivity(FlutterActivity.withCachedEngine("ecom_engine").build(context))
+**项目结构:**
+
+```
+Flutter_Study/
+├── android_ecom/          # 原生 Android 壳工程
+│   ├── app/               # 主 module(SplashActivity、FlutterBridgeManager)
+│   └── settings.gradle.kts
+└── flutter_ecom/          # Flutter Module(电商业务)
+    ├── lib/               # Dart 业务代码
+    └── .android/          # Flutter 自动生成的 Android 宿主代码
 ```
 
-关键优化(对应你 SplashActivity + 预热的设计):
+**集成步骤(源码依赖方式,本地开发调试用):**
 
-- **FlutterEngine 预热/缓存(FlutterEngineCache)**:在 Splash/后台阶段初始化 Engine 并执行 entrypoint,跳转时秒开,否则首跳有 200ms~1s 白屏;
-- 一个 Engine 只能绑一个 FlutterActivity(展示中),多页面共享数据用同 engine + 路由参数;
-- Engine 的 `DartEntrypoint(entrypoint: 'xxx')` 可以执行不同 main,实现"多业务线多入口"。
+**第一步:settings.gradle.kts 引入 Flutter 模块**
+
+```kotlin
+// android_ecom/settings.gradle.kts
+rootProject.name = "android_ecom"
+include(":app")
+
+// 官方脚本:把 Flutter 模块包装成名为 :flutter 的 Gradle 子项目
+// 同时自动注册所有 Flutter 插件的 Android 代码
+apply(from = "../flutter_ecom/.android/include_flutter.groovy")
+```
+
+> `include_flutter.groovy` 的作用:把 Flutter Module(不是标准 Android library)包装成标准的 `:flutter` library 项目,配置 Flutter Gradle 插件处理 Dart 编译和产物打包。
+
+**第二步:app/build.gradle.kts 依赖 flutter 项目**
+
+```kotlin
+// android_ecom/app/build.gradle.kts
+dependencies {
+    // 源码依赖:像依赖普通 library 一样依赖 :flutter
+    implementation(project(":flutter"))
+}
+```
+
+**第三步:Manifest 注册 FlutterActivity**
+
+```xml
+<activity
+    android:name="io.flutter.embedding.android.FlutterActivity"
+    android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+    android:hardwareAccelerated="true"
+    android:theme="@style/Theme.Flutter"
+    android:windowSoftInputMode="adjustResize" />
+```
+
+**第四步:SplashActivity 预热引擎并跳转**
+
+```kotlin
+// 预热引擎(在闪屏页期间执行,用户感知不到耗时)
+FlutterBridgeManager.preloadEngine(context)
+// FlutterBridgeManager.preloadEngine 内部做了三件事:
+// 1. FlutterEngine(context)  —— 创建引擎实例
+// 2. dartExecutor.executeDartEntrypoint(DartEntrypoint.createDefault()) —— 执行 Dart main()
+// 3. FlutterEngineCache.getInstance().put("ecom_engine", engine) —— 缓存引擎
+
+// 跳转 Flutter 页面(用 withCachedEngine 秒开)
+val intent = FlutterActivity
+    .withCachedEngine("ecom_engine")
+    .build(context)
+startActivity(intent)
+finish()
+overridePendingTransition(0, 0)  // 取消动画,无缝过渡
+```
+
+---
+
+**两种集成方式对比(面试常问):**
+
+| | 源码依赖 `project(":flutter")` | 产物依赖 aar |
+|---|---|---|
+| Flutter 环境 | 需要本地安装 | 不需要 |
+| 编译速度 | 慢(每次编译 Dart) | 快(直接用现成产物) |
+| 调试效率 | 高(改完 Dart 立即生效) | 低(需重新打 aar) |
+| 团队协作 | 耦合高(同仓) | 解耦(多仓,maven 版本号) |
+| 适用场景 | Flutter 开发同学本地调试 | 正式发版 / 原生团队 / CI/CD |
+
+> 实际项目通常两种方式并存:Flutter 开发用源码依赖,原生团队和发版用 aar 产物依赖。
+
+---
+
+**关键优化点(对应我们项目的设计):**
+
+- **FlutterEngine 预热 + 缓存(FlutterEngineCache)**:在 SplashActivity 闪屏页期间初始化引擎并执行 Dart main(),跳转时直接从缓存取,秒开。否则首次跳转有 200ms~1s 白屏;
+- 一个 Engine 只能同时绑一个 FlutterActivity(展示中),多 Flutter 页面共享数据用同 engine + 路由跳转;
+- Engine 的 `DartEntrypoint(entrypoint: 'xxx')` 可以执行不同的 Dart 入口函数,实现"多业务线多入口";
+- `overridePendingTransition(0, 0)` 取消页面切换动画,实现闪屏 → Flutter 首页的无缝过渡。
 
 ### 4. 混合开发的路由/栈管理怎么做?
 
